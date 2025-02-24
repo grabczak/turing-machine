@@ -1,29 +1,37 @@
 import { useState } from "react";
 
-export const Table = ({ matrix }: { matrix: string[][] }) => {
+export const Table = ({
+  matrix,
+  setMatrix,
+}: {
+  matrix: string[][];
+  setMatrix: React.Dispatch<React.SetStateAction<string[][]>>;
+}) => {
+  const handleChange = (row: number, column: number, value: string) => {
+    setMatrix((matrix) =>
+      matrix.map((r, _i) =>
+        _i === row ? r.map((c, _j) => (_j === column ? value : c)) : r,
+      ),
+    );
+  };
+
   return (
     <table className="text-2xl">
-      <thead>
-        <tr>
-          {matrix[0].map((cell, i) => (
-            <th key={i} className="border border-white px-8 py-4">
-              {cell}
-            </th>
-          ))}
-        </tr>
-      </thead>
       <tbody>
-        {matrix
-          .filter((_, i) => i > 0)
-          .map((row, i) => (
-            <tr key={i}>
-              {row.map((cell, j) => (
-                <td key={`${i}-${j}`} className="border border-white px-8 py-4">
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
+        {matrix.map((row, i) => (
+          <tr key={i}>
+            {row.map((cell, j) => (
+              <td key={`${i}-${j}`} className="border border-white">
+                <input
+                  value={cell}
+                  onChange={(e) => handleChange(i, j, e.target.value)}
+                  disabled={cell === "δ"}
+                  className="text-center py-4"
+                />
+              </td>
+            ))}
+          </tr>
+        ))}
       </tbody>
     </table>
   );
@@ -67,14 +75,14 @@ export const Tape = ({
 };
 
 export default function App() {
-  const matrix = [
+  const [matrix, setMatrix] = useState(() => [
     ["δ", "0", "X", "B"],
     ["q0", "q1, X, R", "", "q4, B, L"],
     ["q1", "q1, 0, R", "", "q2, B, L"],
     ["q2", "q3, B, L", "q4, 0, L", ""],
     ["q3", "q3, 0, L", "q0, X, R", ""],
     ["q4", "", "q4, 0, L", ""],
-  ];
+  ]);
 
   const [input, setInput] = useState(() => Array(9).fill("0"));
 
@@ -114,7 +122,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col justify-evenly items-center h-full">
-      <Table matrix={matrix} />
+      <Table matrix={matrix} setMatrix={setMatrix} />
       <button
         onClick={() => next(input, index, state)}
         className="border border-white rounded-xl p-4 cursor-pointer text-4xl"
