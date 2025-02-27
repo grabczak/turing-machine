@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type TTable = {
   states: string[];
@@ -118,17 +118,31 @@ export const Tape = ({
 };
 
 export default function App() {
-  const [table, setTable] = useState<TTable>(() => ({
-    states: ["q0", "q1", "q2", "q3", "q4"],
-    symbols: ["0", "X", "B"],
-    matrix: [
-      ["q1, X, R", "", "q4, B, L"],
-      ["q1, 0, R", "", "q2, B, L"],
-      ["q3, B, L", "q4, 0, L", ""],
-      ["q3, 0, L", "q0, X, R", ""],
-      ["", "q4, 0, L", ""],
-    ],
-  }));
+  const getInitialState = () => {
+    const table = localStorage.getItem("table");
+
+    if (table) {
+      return JSON.parse(table);
+    }
+
+    return {
+      states: ["q0", "q1", "q2", "q3", "q4"],
+      symbols: ["0", "X", "B"],
+      matrix: [
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""],
+      ],
+    };
+  };
+
+  const [table, setTable] = useState<TTable>(getInitialState);
+
+  useEffect(() => {
+    localStorage.setItem("table", JSON.stringify(table));
+  }, [table]);
 
   const [input, setInput] = useState(() => Array(31).fill("0"));
 
