@@ -1,32 +1,75 @@
 import { useState } from "react";
 
-export const Table = ({
-  matrix,
-  setMatrix,
-}: {
+type TTable = {
+  states: string[];
+  symbols: string[];
   matrix: string[][];
-  setMatrix: React.Dispatch<React.SetStateAction<string[][]>>;
+};
+
+export const Table = ({
+  table,
+  setTable,
+}: {
+  table: TTable;
+  setTable: React.Dispatch<React.SetStateAction<TTable>>;
 }) => {
-  const handleChange = (row: number, column: number, value: string) => {
-    setMatrix((matrix) =>
-      matrix.map((r, _i) =>
-        _i === row ? r.map((c, _j) => (_j === column ? value : c)) : r,
+  const handleStateChange = (i: number, v: string) => {
+    setTable((table) => ({
+      ...table,
+      states: table.states.map((s, j) => (j === i ? v : s)),
+    }));
+  };
+
+  const handleSymbolChange = (i: number, v: string) => {
+    setTable((table) => ({
+      ...table,
+      symbols: table.symbols.map((s, j) => (j === i ? v : s)),
+    }));
+  };
+
+  const handleMatrixChange = (i: number, j: number, v: string) => {
+    setTable((table) => ({
+      ...table,
+      matrix: table.matrix.map((r, _i) =>
+        _i === i ? r.map((c, _j) => (_j === j ? v : c)) : r,
       ),
-    );
+    }));
   };
 
   return (
     <table className="text-2xl">
+      <thead>
+        <tr>
+          <th className="border border-white">
+            <input value={"δ"} disabled className="px-4 py-2" />
+          </th>
+          {table.symbols.map((s, i) => (
+            <th key={String(i)} className="border border-white">
+              <input
+                value={s}
+                onChange={(e) => handleSymbolChange(i, e.target.value)}
+                className="px-4 py-2"
+              />
+            </th>
+          ))}
+        </tr>
+      </thead>
       <tbody>
-        {matrix.map((row, i) => (
-          <tr key={i}>
-            {row.map((cell, j) => (
+        {table.matrix.map((r, i) => (
+          <tr key={String(i)}>
+            <td className="border border-white">
+              <input
+                value={table.states[i]}
+                onChange={(e) => handleStateChange(i, e.target.value)}
+                className="px-4 py-2"
+              />
+            </td>
+            {r.map((d, j) => (
               <td key={`${i}-${j}`} className="border border-white">
                 <input
-                  value={cell}
-                  onChange={(e) => handleChange(i, j, e.target.value)}
-                  disabled={cell === "δ"}
-                  className="text-center py-4"
+                  value={d}
+                  onChange={(e) => handleMatrixChange(i, j, e.target.value)}
+                  className="px-4 py-2"
                 />
               </td>
             ))}
@@ -75,29 +118,34 @@ export const Tape = ({
 };
 
 export default function App() {
-  const [matrix, setMatrix] = useState(() => [
-    ["δ", "0", "X", "B"],
-    ["q0", "q1, X, R", "", "q4, B, L"],
-    ["q1", "q1, 0, R", "", "q2, B, L"],
-    ["q2", "q3, B, L", "q4, 0, L", ""],
-    ["q3", "q3, 0, L", "q0, X, R", ""],
-    ["q4", "", "q4, 0, L", ""],
-  ]);
+  const [table, setTable] = useState<TTable>(() => ({
+    states: ["q0", "q1", "q2", "q3", "q4"],
+    symbols: ["0", "X", "B"],
+    matrix: [
+      ["q1, X, R", "", "q4, B, L"],
+      ["q1, 0, R", "", "q2, B, L"],
+      ["q3, B, L", "q4, 0, L", ""],
+      ["q3, 0, L", "q0, X, R", ""],
+      ["", "q4, 0, L", ""],
+    ],
+  }));
 
-  const [input, setInput] = useState(() => Array(9).fill("0"));
+  const [input, setInput] = useState(() => Array(31).fill("0"));
 
   const [index, setIndex] = useState(0);
 
   const [state, setState] = useState("q0");
 
   const next = async (input: string[], index: number, state: string) => {
-    const stateIndex = matrix.findIndex((row) => row[0] === state);
+    const stateIndex = table.states.findIndex((s) => s === state);
 
-    const symbolIndex = matrix[0].findIndex(
-      (symbol) => symbol === (input[index] || "B"),
+    const symbolIndex = table.symbols.findIndex(
+      (s) => s === (input[index] || "B"),
     );
 
-    const [newState, newSymbol, direction] = matrix[stateIndex][symbolIndex]
+    const [newState, newSymbol, direction] = table.matrix[stateIndex][
+      symbolIndex
+    ]
       .split(",")
       .map((s) => s.trim());
 
@@ -122,7 +170,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col justify-evenly items-center h-full">
-      <Table matrix={matrix} setMatrix={setMatrix} />
+      <Table table={table} setTable={setTable} />
       <button
         onClick={() => next(input, index, state)}
         className="border border-white rounded-xl p-4 cursor-pointer text-4xl"
