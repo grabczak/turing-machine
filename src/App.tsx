@@ -1,35 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Table } from "./components/Table";
 import { Tape } from "./components/Tape";
-import { TTable } from "./types";
+import { useTableStore } from "./store";
 
 export default function App() {
-  const getInitialState = () => {
-    const table = localStorage.getItem("table");
-
-    if (table) {
-      return JSON.parse(table);
-    }
-
-    return {
-      states: ["q0", "q1", "q2", "q3", "q4"],
-      symbols: ["0", "X", "B"],
-      matrix: [
-        ["", "", ""],
-        ["", "", ""],
-        ["", "", ""],
-        ["", "", ""],
-        ["", "", ""],
-      ],
-    };
-  };
-
-  const [table, setTable] = useState<TTable>(getInitialState);
-
-  useEffect(() => {
-    localStorage.setItem("table", JSON.stringify(table));
-  }, [table]);
+  const table = useTableStore((state) => state.table);
 
   const [input, setInput] = useState(() => Array(15).fill("0"));
 
@@ -44,7 +20,7 @@ export default function App() {
       (s) => s === (input[index] || "B"),
     );
 
-    const [newState, newSymbol, direction] = table.matrix[stateIndex][
+    const [newState, newSymbol, direction] = table.transitions[stateIndex][
       symbolIndex
     ]
       .split(",")
@@ -71,7 +47,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col justify-evenly items-center h-full">
-      <Table table={table} setTable={setTable} />
+      <Table />
       <button
         onClick={() => next(input, index, state)}
         className="border border-white rounded-xl p-4 cursor-pointer text-4xl"
