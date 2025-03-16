@@ -31,7 +31,7 @@ export default function App() {
     localStorage.setItem("table", JSON.stringify(table));
   }, [table]);
 
-  const [input, setInput] = useState(() => Array(31).fill("0"));
+  const [input, setInput] = useState(() => Array(15).fill("0"));
 
   const [index, setIndex] = useState(0);
 
