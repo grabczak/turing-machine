@@ -1,12 +1,20 @@
+import { useMachineStore } from "../store";
+
 const Cell = ({
   value,
   head,
-  state,
+  handleChange,
 }: {
   value: string;
   head: boolean;
-  state: string;
+  handleChange?: (value: string) => void;
 }) => {
+  const _handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    if (handleChange) {
+      handleChange(e.target.value);
+    }
+  };
+
   return (
     <div>
       <div
@@ -17,33 +25,33 @@ const Cell = ({
       </div>
       <input
         value={value}
+        onChange={_handleChange}
         className="border border-white w-16 h-16 text-center"
       />
       <div
-        className="w-16 h-16 flex justify-center items-center text-2xl"
+        className="w-16 h-16 flex justify-center items-center"
         style={{ visibility: head ? "visible" : "hidden" }}
       >
-        {state}
+        ↑
       </div>
     </div>
   );
 };
 
-export const Tape = ({
-  index,
-  input,
-  state,
-}: {
-  index: number;
-  input: string[];
-  state: string;
-}) => {
+export const Tape = () => {
+  const { input, offset, changeInput } = useMachineStore();
+
   return (
     <div className="flex text-4xl">
-      <Cell value="#" head={index === -1} state={state} />
+      <Cell value="#" head={offset === -1} />
       <div className="flex">
         {input.map((symbol, i) => (
-          <Cell value={symbol} head={index === i} state={state} key={i} />
+          <Cell
+            key={i}
+            value={symbol}
+            head={offset === i}
+            handleChange={(v) => changeInput(i, v)}
+          />
         ))}
       </div>
     </div>

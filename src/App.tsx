@@ -1,60 +1,64 @@
-import { useState } from "react";
-
 import { Table } from "./components/Table";
 import { Tape } from "./components/Tape";
-import { useTableStore } from "./store";
+import { useMachineStore } from "./store";
 
 export default function App() {
-  const table = useTableStore((state) => state.table);
+  const { states, symbols, transitions, input, state, offset, makeTransition } =
+    useMachineStore();
 
-  const [input, setInput] = useState(() => Array(15).fill("0"));
-
-  const [index, setIndex] = useState(0);
-
-  const [state, setState] = useState("q0");
-
-  const next = async (input: string[], index: number, state: string) => {
-    const stateIndex = table.states.findIndex((s) => s === state);
-
-    const symbolIndex = table.symbols.findIndex(
-      (s) => s === (input[index] || "B"),
-    );
-
-    const [newState, newSymbol, direction] = table.transitions[stateIndex][
-      symbolIndex
-    ]
-      .split(",")
-      .map((s) => s.trim());
-
-    if (newState && newSymbol && direction) {
-      const newInput = input.map((symbol, i) =>
-        i === index ? newSymbol : symbol,
+  const run = () => {
+    const mapIndices = (array: string[]): { [key: string]: number } => {
+      return array.reduce(
+        (acc, item, index) => ({ ...acc, [item]: index }),
+        {},
       );
+    };
 
-      const newIndex = direction === "R" ? index + 1 : index - 1;
+    const stateIndices = mapIndices(states);
+    const symbolIndices = mapIndices(symbols);
 
-      setInput(newInput);
+    console.log(stateIndices, symbolIndices, state);
 
-      setIndex(newIndex);
+    const next = async (input: string[], state: string, offset: number) => {
+      const stateIndex = stateIndices[state];
+      const symbolIndex = symbolIndices[input[offset] || "B"];
 
-      setState(newState);
+      console.log(stateIndex, symbolIndex);
 
-      await new Promise((r) => setTimeout(r, 0));
+      const [nextState, nextSymbol, direction] = transitions[stateIndex][
+        symbolIndex
+      ]
+        .split(",")
+        .map((s) => s.trim());
 
-      next(newInput, newIndex, newState);
-    }
+      if (nextState && nextSymbol && direction) {
+        const nextInput = input.map((symbol, i) =>
+          i === offset ? nextSymbol : symbol,
+        );
+
+        const nextOffset = direction === "L" ? offset - 1 : offset + 1;
+
+        makeTransition(nextInput, nextState, nextOffset);
+
+        await new Promise((r) => setTimeout(r, 0));
+
+        next(nextInput, nextState, nextOffset);
+      }
+    };
+
+    next(input, state, offset);
   };
 
   return (
     <div className="flex flex-col justify-evenly items-center h-full">
       <Table />
       <button
-        onClick={() => next(input, index, state)}
+        onClick={run}
         className="border border-white rounded-xl p-4 cursor-pointer text-4xl"
       >
         Run
       </button>
-      <Tape index={index} input={input} state={state} />
+      <Tape />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 {
   "states": ["q0", "q1", "q2", "q3", "q4"],
   "symbols": ["0", "X", "B"],
-  "matrix": [
+  "transitions": [
     ["q1, X, R", "", "q4, B, L"],
     ["q1, 0, R", "", "q2, B, L"],
     ["q3, B, L", "q4, 0, L", ""],

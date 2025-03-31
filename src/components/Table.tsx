@@ -1,8 +1,10 @@
-import { useTableStore } from "../store";
+import { useMachineStore } from "../store";
 
 export const Table = () => {
   const {
-    table,
+    states,
+    symbols,
+    transitions,
     changeState,
     changeSymbol,
     changeTransition,
@@ -10,7 +12,7 @@ export const Table = () => {
     removeRow,
     addColumn,
     removeColumn,
-  } = useTableStore((state) => state);
+  } = useMachineStore();
 
   return (
     <div className="relative text-2xl">
@@ -20,7 +22,7 @@ export const Table = () => {
             <th className="border border-white">
               <input value={"δ"} disabled className="px-4 py-2" />
             </th>
-            {table.symbols.map((s, i) => (
+            {symbols.map((s, i) => (
               <th key={String(i)} className="relative border border-white">
                 <div
                   onClick={() => removeColumn(i)}
@@ -38,7 +40,7 @@ export const Table = () => {
           </tr>
         </thead>
         <tbody>
-          {table.transitions.map((r, i) => (
+          {transitions.map((r, i) => (
             <tr key={String(i)}>
               <td className="border border-white">
                 <div
@@ -48,7 +50,7 @@ export const Table = () => {
                   ⊖
                 </div>
                 <input
-                  value={table.states[i]}
+                  value={states[i]}
                   onChange={(e) => changeState(i, e.target.value)}
                   className="px-4 py-2"
                 />
