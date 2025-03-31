@@ -17,13 +17,9 @@ export default function App() {
     const stateIndices = mapIndices(states);
     const symbolIndices = mapIndices(symbols);
 
-    console.log(stateIndices, symbolIndices, state);
-
     const next = async (input: string[], state: string, offset: number) => {
       const stateIndex = stateIndices[state];
       const symbolIndex = symbolIndices[input[offset] || "B"];
-
-      console.log(stateIndex, symbolIndex);
 
       const [nextState, nextSymbol, direction] = transitions[stateIndex][
         symbolIndex
